@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Face Comparison</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        #result {
+            font-size: 20px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Face Comparison</h1>
+    <input type="file" id="image1Input" accept="image/*">
+    <input type="file" id="image2Input" accept="image/*">
+    <button onclick="compareFaces()">Compare Faces</button>
+    <div id="result"></div>
+
+    <script>
+        function compareFaces() {
+            const image1 = document.getElementById('image1Input').files[0];
+            const image2 = document.getElementById('image2Input').files[0];
+        
+            if (!image1 || !image2) {
+                alert('Please select two images to compare.');
+                return;
+            }
+        
+            const formData = new FormData();
+            formData.append('image1', image1);
+            formData.append('image2', image2);
+            console.log(image1);
+            console.log(image2)
+            fetch('http://127.0.0.1:8800/compare_faces', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (typeof data === 'undefined' || typeof data.similarity_percentage === 'undefined') {
+                    throw new Error('Invalid response from the server.');
+                }
+        
+                const similarityPercentage = data.similarity_percentage.toFixed(2);
+                const resultDiv = document.getElementById('result');
+                resultDiv.textContent = `Similarity Score: ${similarityPercentage}%`;
+            })
+            .catch(error => {
+                alert('An error occurred while comparing faces.');
+                console.log(error);
+            });
+        }
+    </script>
+</body>
+</html>
